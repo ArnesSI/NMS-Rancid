@@ -1,0 +1,11 @@
+Perl module for Rancid (http://www.shrubbery.net/rancid/)
+Reads and writes Rancid configuration and provides methods to get and save
+device configurations.
+
+INSTALL
+
+The usual commands will sufice:
+
+    perl Makefile.PL
+    make
+    make install
