@@ -1,3 +1,6 @@
+0.12   Thu Jun 21 19:47:13 CEST 2012
+    - Add MANIFEST
+
 0.11   Thu Jun 21 16:46:10 CEST 2012
     - Fix some issues with enviroment variable handling when calling rancid scripts
     - Saving config failed in debug mode

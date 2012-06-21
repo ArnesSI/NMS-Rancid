@@ -1,0 +1,9 @@
+lib/NMS/Rancid.pm
+lib/NMS/Rancid/Group.pm
+lib/NMS/Rancid/Node.pm
+lib/NMS/Rancid/Cvs.pm
+Makefile.PL
+LICENSE
+Changes
+MANIFEST
+README
