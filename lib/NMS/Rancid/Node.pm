@@ -371,12 +371,6 @@ sub saveConfigText {
     # need to reset ENV variables from rancid config
     my %env_pre = %ENV;
     $self->rancid->_prepareEnvironment();
-    # need to set home path (may have been removed)
-    my $set_home = 0;
-    if (! defined $ENV{HOME}) {
-        $ENV{HOME} = '/tmp';
-        $set_home = 1;
-    }
     $ENV{CLOGINRC} = $self->rancid->{cloginrc};
 
     # run any password saving code (init)
@@ -391,12 +385,14 @@ sub saveConfigText {
     }
 
     # run appropriate *rancid script
-    $rancid_cmd = "cd $tmp_dir; $rancid_bin ".$self->name;
-    $rancid_cmd.= " -l" if ($debug); # log is less verbose, but does not leave files lying around
+    $rancid_cmd = "cd $tmp_dir; $rancid_bin ";
+    $rancid_cmd.= $self->name;
     $rancid_cmd.= " 2>&1"; # capture stderr
     carp("'$rancid_cmd'") if ($debug);
     my $cmd_output = qx($rancid_cmd);
     $ret = $?;
+    carp("cmd exit code: $ret") if ($debug);
+    carp("cmd ouptut: $cmd_output") if ($debug);
     my $config_path = $tmp_dir.'/'.$self->name.'.new'; # this is where out saved config waits
 
     # run any password saving code (post)
@@ -411,7 +407,6 @@ sub saveConfigText {
 
     # set ENV variables back
     %ENV = %env_pre;
-    delete $ENV{HOME} if $set_home;
     delete $ENV{CLOGINRC};
 
     # try to determine if command succedded

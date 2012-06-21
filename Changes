@@ -1,2 +1,6 @@
+0.11   Thu Jun 21 16:46:10 CEST 2012
+    - Fix some issues with enviroment variable handling when calling rancid scripts
+    - Saving config failed in debug mode
+
 0.10   Tue Jun 19 10:31:35 CEST 2012
     - First release
