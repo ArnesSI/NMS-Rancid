@@ -660,10 +660,12 @@ sub _cvsDiff {
         $mail.= "\n";
         $mail.= $diff."\n.\n";
 
-        if (system("/bin/echo '$mail' | /usr/sbin/sendmail -t") != 0) {
-            $self->_pushError("Could not send diff mail: $?");
+        open(SENDMAIL, "| /usr/sbin/sendmail -t") or do {
+            $self->_pushError("Could not open pipe to sendmail ($!)");
             return undef;
-        }
+        };
+        print SENDMAIL $mail;
+        close SENDMAIL;
     }
 
     return $diff;
