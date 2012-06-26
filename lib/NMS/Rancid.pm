@@ -28,7 +28,7 @@ sub new {
     $self->{bin_path}     = $args{bin_path}     || $self->{base_path}.'/bin';
     $self->{dead_groups}  = $args{dead_groups}  || 'UKINJENO';
     $self->{cloginrc}     = $args{cloginrc}     || $ENV{HOME}.'/.cloginrc';
-    $self->{encrypt_key_name}   = $args{encrypt_key_name} || undef;
+    $self->{encrypt_keys} = $args{encrypt_keys} || undef;
     $self->{debug}        = $args{debug}        || 0;
 
     bless $self, $class;
@@ -362,8 +362,9 @@ sub getVendorScriptPath {
 #  dev_name_2 => { ...
 #
 # cloginrc file is overwritten
-# cloginrc can be encrypted if $self->{encrypt_key_name} is defined
-# and set to gpg key recipient in gpg keychain for current user
+# cloginrc can be encrypted if $self->{encrypt_keys} is defined
+# and set to comma sepatated list of gpg key recipients in gpg
+# keychain for current user
 sub exportCloginrc {
     my $self = shift;
     my $device_data = shift;
@@ -401,9 +402,10 @@ sub exportCloginrc {
     if (-f $cloginrc_tmp && ! unlink $cloginrc_tmp) {
         croak("Could not remove $cloginrc_tmp");
     }
-    if (defined $self->{encrypt_key_name}) {
+    if (defined $self->{encrypt_keys}) {
         my $encrypt_cmd = $self->{encrypt_cmd_template};
-        $encrypt_cmd =~ s/<recipient>/$self->{encrypt_key_name}/;
+        my $recipients = join(' -r ', split(/,\s*/, $self->{encrypt_keys}));
+        $encrypt_cmd =~ s/<recipient>/$recipients/;
         $encrypt_cmd =~ s/<file>/$cloginrc_tmp/;
         print STDERR "$encrypt_cmd\n" if $self->{debug};
         unless (open(WRITE, "|$encrypt_cmd")) {
@@ -417,7 +419,7 @@ sub exportCloginrc {
     }
     print WRITE $cloginrc_str;
     close WRITE;
-    unless (chmod(0600, $cloginrc_tmp)) {
+    unless (chmod(0640, $cloginrc_tmp)) {
         croak("Cannot chmod $cloginrc_tmp");
     }
     unless (move($cloginrc_tmp, $self->{cloginrc})){
@@ -763,9 +765,9 @@ this file via exportCloginrc() method.
 
 Default: $ENV{HOME}/.cloginrc
 
-=item * encrypt_key_name - Name of GPG key (recipient) to encrypt exported 
-cloginrc file with. If not defined the file is exported in clear text. The
-key must be known to GPG keychain for user running this library before 
+=item * encrypt_keys - Comma separated list of GPG keys (recipients) to encrypt
+exported cloginrc file with. If not defined the file is exported in clear text.
+The keys must be known to GPG keychain for user running this library before 
 exporting.
 
 Note: for this to be usefull, your Rancid *login scripts must be able to
@@ -861,9 +863,9 @@ Expected $device_data structure is:
    dev_name_2 => { ...
  
 Any existing cloginrc file will be overwritten.
-If encrypt_key_name argument is defined at object initialization, the exported
-file will be encrypted with GPG key of recipient in encrypt_key_name. The
-recipient must be known in GPG keychain before exporting.
+If encrypt_keys argument is defined at object initialization, the exported
+file will be encrypted with GPG keys of recipients in encrypt_keys. The
+recipients must be known in GPG keychain before exporting.
 
 =back
 
